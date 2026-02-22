@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register</title>
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+  <div class="auth-container">
+    <h1>Create Account</h1>
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="registerUsername">Username</label>
+        <input type="text" id="registerUsername" name="username" required />
+      </div>
+      <div class="form-group">
+        <label for="registerEmail">Email</label>
+        <input type="email" id="registerEmail" name="email" required />
+      </div>
+      <div class="form-group">
+        <label for="registerPassword">Password</label>
+        <input type="password" id="registerPassword" name="password" required />
+      </div>
+      <div class="form-group">
+        <label for="registerConfirmPassword">Confirm Password</label>
+        <input type="password" id="registerConfirmPassword" name="confirmPassword" required />
+      </div>
+      <div id="registerAlert" class="alert" style="display: none;"></div>
+      <button type="submit">Register</button>
+    </form>
+    <div class="auth-footer">
+      <a href="/auth/login.html">Already have an account?</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("registerForm");
+    const alertBox = document.getElementById("registerAlert");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      alertBox.style.display = "none";
+
+      const password = form.registerPassword.value;
+      const confirmPassword = form.registerConfirmPassword.value;
+
+      if (password !== confirmPassword) {
+        alertBox.className = "alert alert-error";
+        alertBox.textContent = "Passwords do not match";
+        alertBox.style.display = "block";
+        return;
+      }
+
+      const formData = new FormData(form);
+      const body = {
+        username: formData.get("username"),
+        email: formData.get("email"),
+        password: formData.get("password"),
+      };
+
+      try {
+        const resp = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        const data = await resp.json();
+
+        if (resp.ok) {
+          alertBox.className = "alert alert-success";
+          alertBox.textContent = "Registration successful. Redirecting to login...";
+          alertBox.style.display = "block";
+          setTimeout(() => {
+            window.location.href = "/auth/login.html";
+          }, 1000);
+        } else {
+          alertBox.className = "alert alert-error";
+          alertBox.textContent = data.error || "Registration failed";
+          alertBox.style.display = "block";
+        }
+      } catch (err) {
+        alertBox.className = "alert alert-error";
+        alertBox.textContent = "Network error: " + err.message;
+        alertBox.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
