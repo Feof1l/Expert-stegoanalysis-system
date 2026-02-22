@@ -1,0 +1,12 @@
+include:
+  - db/db.yml
+  - stego_model/fastapi.yml
+  - frontend/frontend.yml
+  - stego_analyzer/backend.yml
+
+volumes:
+  data:
+
+networks:
+  app-network:
+    driver: bridge

@@ -4,3 +4,5 @@ stego_model/__pycache__
 stego_analyzer/images
 stego_analyzer/analyzer
 stego_analyzer/features.csv
+.env
+stego_analyzer/logs

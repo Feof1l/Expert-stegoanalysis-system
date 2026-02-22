@@ -1,13 +1,8 @@
-FROM node:20-alpine
+FROM nginx:alpine
 
-WORKDIR /app
+COPY index.html /usr/share/nginx/html/
+COPY styles.css /usr/share/nginx/html/
 
-COPY package.json pnpm-lock.yaml* ./
+EXPOSE 80
 
-RUN npm install --production
-
-COPY . .
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
+CMD ["nginx", "-g", "daemon off;"]

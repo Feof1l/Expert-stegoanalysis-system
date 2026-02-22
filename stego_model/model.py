@@ -4,7 +4,6 @@ from sklearn.neural_network import MLPClassifier
 
 df = pd.read_csv("../stego_analyzer/features.csv")
 
-# Бинарная метка: 0 = clean, 1 = stego
 df["y"] = (df["label"] > 0).astype(int)
 
 X = df[[
@@ -25,6 +24,5 @@ model.fit(X_train, y_train)
 
 print("Test accuracy:", model.score(X_test, y_test))
 
-# Сохранить модель
 import joblib
 joblib.dump(model, "stego_model.pkl")
