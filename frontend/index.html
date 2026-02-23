@@ -6,7 +6,6 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- АВТОРИЗАЦИЯ -->
   <main id="auth-container" class="container auth-container">
     <nav class="tabs">
       <button class="tab active" data-tab="login">Login</button>
@@ -26,7 +25,16 @@
           <input type="password" id="login-password" name="password" required />
         </div>
         <div id="login-alert" class="alert"></div>
-        <button type="submit" class="submit-btn">Sign In</button>
+        <button type="submit" class="animated-button login-btn">
+          <svg viewBox="0 0 24 24" class="arr-2" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"></path>
+          </svg>
+          <span class="text">Sign In</span>
+          <span class="circle"></span>
+          <svg viewBox="0 0 24 24" class="arr-1" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"></path>
+          </svg>
+        </button>
       </form>
     </section>
 
@@ -50,7 +58,16 @@
           <input type="password" id="register-confirm-password" required />
         </div>
         <div id="register-alert" class="alert"></div>
-        <button type="submit" class="submit-btn">Create Account</button>
+        <button type="submit" class="animated-button register-btn">
+          <svg viewBox="0 0 24 24" class="arr-2" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"></path>
+          </svg>
+          <span class="text">Create Account</span>
+          <span class="circle"></span>
+          <svg viewBox="0 0 24 24" class="arr-1" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"></path>
+          </svg>
+        </button>
       </form>
     </section>
 
@@ -66,12 +83,20 @@
           <input type="password" id="new-password" name="new_password" required />
         </div>
         <div id="change-password-alert" class="alert"></div>
-        <button type="submit" class="submit-btn">Change Password</button>
+        <button type="submit" class="animated-button change-password-btn">
+          <svg viewBox="0 0 24 24" class="arr-2" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"></path>
+          </svg>
+          <span class="text">Change Password</span>
+          <span class="circle"></span>
+          <svg viewBox="0 0 24 24" class="arr-1" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"></path>
+          </svg>
+        </button>
       </form>
     </section>
   </main>
 
-  <!-- ДАШБОРД -->
   <main id="dashboard-container" class="container dashboard-container hidden">
     <header class="dashboard-header">
       <h1>Development of Intelligent Expert System for Steganalysis of Digital Images</h1>
@@ -105,7 +130,6 @@
 
   <script>
     const BACKEND_URL = "http://localhost:8080";
-    const FASTAPI_URL = "http://localhost:8000"; 
 
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -221,53 +245,52 @@
     }
 
     async function handleAnalyze() {
-    const file = document.getElementById('image-input').files[0];
-    if (!file) {
+      const file = document.getElementById('image-input').files[0];
+      if (!file) {
         document.getElementById('result').textContent = 'Пожалуйста, выберите изображение';
         return;
-    }
+      }
 
-    const token = localStorage.getItem('token');
-    if (!token) {
+      const token = localStorage.getItem('token');
+      if (!token) {
         document.getElementById('result').textContent = 'Необходимо авторизоваться';
         return;
-    }
+      }
 
-    const resultDiv = document.getElementById('result');
-    resultDiv.textContent = 'Анализ изображения...';
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = 'Анализ изображения...';
 
-    try {
+      try {
         const formData = new FormData();
         formData.append('image', file);
 
         const response = await fetch(`${BACKEND_URL}/api/analyze`, {
-        method: 'POST',
-        headers: {
+          method: 'POST',
+          headers: {
             'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          },
+          body: formData
         });
 
         const data = await response.json();
         
         if (response.ok) {
-        const prob = (data.stego_prob * 100).toFixed(1);
-        resultDiv.innerHTML = `
+          const prob = (data.stego_prob * 100).toFixed(1);
+          resultDiv.innerHTML = `
             <div class="analysis-result">
-            <h3>Результат анализа</h3>
-            <p>Вероятность стеганографии: <strong>${prob}%</strong></p>
+              <h3>Результат анализа</h3>
+              <p>Вероятность стеганографии: <strong>${prob}%</strong></p>
+              <p>${data.result}</p>
             </div>
-        `;
+          `;
         } else {
-        resultDiv.textContent = data.error || 'Ошибка анализа';
+          resultDiv.textContent = data.error || 'Ошибка анализа';
         }
-    } catch (error) {
+      } catch (error) {
         resultDiv.textContent = 'Ошибка соединения с сервером';
         console.error('Analyze error:', error);
+      }
     }
-    }
-
-
 
     function showDashboard() {
       document.getElementById('auth-container').classList.add('hidden');
