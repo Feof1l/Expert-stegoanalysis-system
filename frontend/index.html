@@ -113,7 +113,18 @@
     <section class="upload-section">
       <div class="form-group">
         <label for="image-input">Select Image for Analysis</label>
-        <input type="file" id="image-input" accept="image/*" />
+        <div class="file-input-wrapper">
+        <input type="file" id="image-input" accept="image/*" style="display: none;" />
+        <button type="button" class="open-file">
+            <span class="file-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 71 67">
+                <path stroke-width="5" stroke="var(--text)" d="M41.7322 11.7678L42.4645 12.5H43.5H68.5V64.5H2.5V2.5H32.4645L41.7322 11.7678Z"></path>
+            </svg>
+            <span class="file-front"></span>
+            </span>
+            Open file
+        </button>
+        </div>
       </div>
 
       <div class="preview">
@@ -201,6 +212,8 @@
     document.getElementById('register-form').addEventListener('submit', handleRegister);
     document.getElementById('change-password-form').addEventListener('submit', handleChangePassword);
     document.getElementById('logout-btn').addEventListener('click', handleLogout);
+    document.querySelector('.open-file').addEventListener('click', () => {
+    document.getElementById('image-input').click();});
     document.getElementById('image-input').addEventListener('change', handleImagePreview);
     document.getElementById('check-btn').addEventListener('click', handleAnalyze);
 
