@@ -177,6 +177,254 @@ input:focus {
   transform: none;
 }
 
+.loader-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18em;
+  height: 14em;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 20;
+}
+
+.capybaraloader {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  --color: #cc7d2d;
+  --color2: #53381c;
+}
+
+.capybara {
+  width: 100%;
+  height: 75%;
+  position: relative;
+  z-index: 1;
+}
+
+.loader {
+  width: 100%;
+  height: 25%;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.capy {
+  width: 85%;
+  height: 100%;
+  background: linear-gradient(var(--color), 90%, var(--color2));
+  border-radius: 45%;
+  position: relative;
+  z-index: 1;
+  animation: movebody 1s linear infinite;
+}
+
+.capyhead {
+  width: 7.5em;
+  height: 7em;
+  bottom: 0em;
+  right: 0em;
+  position: absolute;
+  background-color: var(--color);
+  z-index: 3;
+  border-radius: 3.5em;
+  box-shadow: -1em 0em var(--color2);
+  animation: movebody 1s linear infinite;
+}
+
+.capyear {
+  width: 2em;
+  height: 2em;
+  background: linear-gradient(-45deg, var(--color), 90%, var(--color2));
+  top: 0em;
+  left: 0em;
+  border-radius: 100%;
+  position: absolute;
+  overflow: hidden;
+  z-index: 3;
+}
+
+.capyear:nth-child(2) {
+  left: 5em;
+  background: linear-gradient(25deg, var(--color), 90%, var(--color2));
+}
+
+.capyear2 {
+  width: 100%;
+  height: 1em;
+  background-color: var(--color2);
+  bottom: 0em;
+  left: 0.5em;
+  border-radius: 100%;
+  position: absolute;
+  transform: rotate(-45deg);
+}
+
+.capymouth {
+  width: 3.5em;
+  height: 2em;
+  background-color: var(--color2);
+  position: absolute;
+  bottom: 0em;
+  left: 2.5em;
+  border-radius: 50%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.5em;
+}
+
+.capylips {
+  width: 0.25em;
+  height: 0.75em;
+  border-radius: 100%;
+  transform: rotate(-45deg);
+  background-color: var(--color);
+}
+
+.capylips:nth-child(2) {
+  transform: rotate(45deg);
+}
+
+.capyeye {
+  width: 2em;
+  height: 0.5em;
+  background-color: var(--color2);
+  position: absolute;
+  bottom: 3.5em;
+  left: 1.5em;
+  border-radius: 5em;
+  transform: rotate(45deg);
+}
+
+.capyeye:nth-child(4) {
+  transform: rotate(-45deg);
+  left: 5.5em;
+  width: 1.75em;
+}
+
+.capyleg {
+  width: 6em;
+  height: 5em;
+  bottom: 0em;
+  left: 0em;
+  position: absolute;
+  background: linear-gradient(var(--color), 95%, var(--color2));
+  z-index: 2;
+  border-radius: 2em;
+  animation: movebody 1s linear infinite;
+}
+
+.capyleg2 {
+  width: 1.75em;
+  height: 3em;
+  bottom: 0em;
+  left: 3.25em;
+  position: absolute;
+  background: linear-gradient(var(--color), 80%, var(--color2));
+  z-index: 2;
+  border-radius: 0.75em;
+  box-shadow: inset 0em -0.5em var(--color2);
+  animation: moveleg 1s linear infinite;
+}
+
+.capyleg2:nth-child(3) {
+  width: 1.25em;
+  left: 0.5em;
+  height: 2em;
+  animation: moveleg2 1s linear infinite 0.075s;
+}
+
+@keyframes moveleg {
+  0% {
+    transform: rotate(-45deg) translateX(-5%);
+  }
+  50% {
+    transform: rotate(45deg) translateX(5%);
+  }
+  100% {
+    transform: rotate(-45deg) translateX(-5%);
+  }
+}
+
+@keyframes moveleg2 {
+  0% {
+    transform: rotate(45deg);
+  }
+  50% {
+    transform: rotate(-45deg);
+  }
+  100% {
+    transform: rotate(45deg);
+  }
+}
+
+@keyframes movebody {
+  0% {
+    transform: translateX(0%);
+  }
+  50% {
+    transform: translateX(2%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.loaderline {
+  width: 50em;
+  height: 0.5em;
+  border-top: 0.5em dashed var(--color2);
+  animation: moveline 10s linear infinite;
+}
+
+@keyframes moveline {
+  0% {
+    transform: translateX(0%);
+    opacity: 0%;
+  }
+  5% {
+    opacity: 100%;
+  }
+  95% {
+    opacity: 100%;
+  }
+  100% {
+    opacity: 0%;
+    transform: translateX(-70%);
+  }
+}
+
+.result {
+  position: relative;
+  padding: 28px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  font-size: 16px;
+  min-height: 200px;
+  margin-top: 24px;
+  text-align: center;
+  font-weight: 500;
+}
+
+#result-content {
+  min-height: 90px;
+}
+
+.analysis-result {
+  text-align: left;
+}
+
+.analysis-result h3 {
+  color: var(--accent-light);
+  margin-bottom: 16px;
+}
+
 .dashboard-header {
   position: relative;
   text-align: center;
@@ -205,38 +453,6 @@ input:focus {
   border-radius: 12px;
   display: none;
   box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-}
-
-.alert {
-  padding: 14px 18px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  font-size: 14px;
-  display: none;
-}
-
-.alert-success {
-  background: rgba(16, 185, 129, 0.2);
-  border: 1px solid var(--accent);
-  color: #ccffcc;
-}
-
-.alert-error {
-  background: rgba(220, 53, 69, 0.2);
-  border: 1px solid #dc3545;
-  color: #ffcccc;
-}
-
-.result {
-  padding: 28px;
-  background: rgba(16, 185, 129, 0.15);
-  border: 2px solid var(--accent);
-  border-radius: 12px;
-  font-size: 16px;
-  min-height: 90px;
-  margin-top: 24px;
-  text-align: center;
-  font-weight: 500;
 }
 
 .container.hidden {
@@ -378,4 +594,24 @@ input:focus {
   width: 220px;
   height: 220px;
   opacity: 1;
+}
+
+.alert {
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  display: none;
+}
+
+.alert-success {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid var(--accent);
+  color: #ccffcc;
+}
+
+.alert-error {
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid #dc3545;
+  color: #ffcccc;
 }

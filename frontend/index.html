@@ -128,7 +128,32 @@
       </button>
       
       <div id="result" class="result">
-        Select an image to begin analysis
+        <div id="loader-container" class="loader-container">
+          <div class="capybaraloader">
+            <div class="capybara">
+              <div class="capyhead">
+                <div class="capyear">
+                  <div class="capyear2"></div>
+                </div>
+                <div class="capyear"></div>
+                <div class="capymouth">
+                  <div class="capylips"></div>
+                  <div class="capylips"></div>
+                </div>
+                <div class="capyeye"></div>
+                <div class="capyeye"></div>
+              </div>
+              <div class="capyleg"></div>
+              <div class="capyleg2"></div>
+              <div class="capyleg2"></div>
+              <div class="capy"></div>
+            </div>
+            <div class="loader">
+              <div class="loaderline"></div>
+            </div>
+          </div>
+        </div>
+        <div id="result-content">Select an image to begin analysis</div>
       </div>
     </section>
   </main>
@@ -252,18 +277,25 @@
     async function handleAnalyze() {
       const file = document.getElementById('image-input').files[0];
       if (!file) {
-        document.getElementById('result').textContent = 'Пожалуйста, выберите изображение';
+        document.getElementById('result-content').textContent = 'Пожалуйста, выберите изображение';
         return;
       }
 
       const token = localStorage.getItem('token');
       if (!token) {
-        document.getElementById('result').textContent = 'Необходимо авторизоваться';
+        document.getElementById('result-content').textContent = 'Необходимо авторизоваться';
         return;
       }
 
-      const resultDiv = document.getElementById('result');
-      resultDiv.textContent = 'Анализ изображения...';
+      const loaderContainer = document.getElementById('loader-container');
+      const resultContent = document.getElementById('result-content');
+      
+      loaderContainer.style.opacity = '1';
+      loaderContainer.style.visibility = 'visible';
+      resultContent.style.display = 'none';
+
+      const demoDelay = Math.random() * 4000 + 1000;
+      await new Promise(resolve => setTimeout(resolve, demoDelay));
 
       try {
         const formData = new FormData();
@@ -281,7 +313,7 @@
         
         if (response.ok) {
           const prob = (data.stego_prob * 100).toFixed(1);
-          resultDiv.innerHTML = `
+          resultContent.innerHTML = `
             <div class="analysis-result">
               <h3>Результат анализа</h3>
               <p>Вероятность стеганографии: <strong>${prob}%</strong></p>
@@ -289,11 +321,15 @@
             </div>
           `;
         } else {
-          resultDiv.textContent = data.error || 'Ошибка анализа';
+          resultContent.textContent = data.error || 'Ошибка анализа';
         }
       } catch (error) {
-        resultDiv.textContent = 'Ошибка соединения с сервером';
+        resultContent.textContent = 'Ошибка соединения с сервером';
         console.error('Analyze error:', error);
+      } finally {
+        loaderContainer.style.opacity = '0';
+        loaderContainer.style.visibility = 'hidden';
+        resultContent.style.display = 'block';
       }
     }
 
