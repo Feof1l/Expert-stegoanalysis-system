@@ -227,7 +227,6 @@
       try {
         const res = await apiRequest('/login', data);
         localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
         showDashboard();
       } catch (err) {
         showAlert('login-alert', err.message);
@@ -246,7 +245,6 @@
       try {
         const res = await apiRequest('/register', data);
         localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
         showDashboard();
       } catch (err) {
         showAlert('register-alert', err.message);
@@ -273,7 +271,6 @@
 
     function handleLogout() {
       localStorage.removeItem('token');
-      localStorage.removeItem('user');
       showAuth();
     }
 
@@ -327,32 +324,47 @@
           const prob = (data.stego_prob * 100).toFixed(1);
           let featuresHtml = '';
           if (data.features && data.features.length > 0) {
-            featuresHtml = '<div class="features-table"><h4>Feature analysis</h4><table><thead><tr><th>Feature</th><th>Value</th><th>Normal range</th><th>Status</th></tr></thead><tbody>';
+            featureHtml = '<div class="features-table"><h4>Feature Analysis</h4><table><thead><tr><th>Feature</th><th>Value</th><th>Normal Range</th><th>Status</th></tr></thead><tbody>';
             for (const f of data.features) {
               const statusClass = f.is_anomaly ? 'anomaly' : 'normal';
               const statusText = f.is_anomaly ? 'Deviation' : 'Standard';
-              featuresHtml += `<tr class="${statusClass}">
+              featureHtml += `<tr class="${statusClass}">
                 <td>${f.name}</td>
                 <td>${f.value.toFixed(6)}</td>
                 <td>${f.min_normal.toFixed(2)} - ${f.max_normal.toFixed(2)}</td>
                 <td>${statusText}</td>
               </tr>`;
             }
-            featuresHtml += '</tbody></table></div>';
+            featureHtml += '</tbody></table></div>';
           }
+
+          const probValue = data.stego_prob;
+          const isStego = probValue > 0.5;
+          const probPercent = (probValue * 100).toFixed(1);
+          const resultLabel = isStego ? 'Hidden Content Detected' : 'No Hidden Content Detected';
+          const resultDesc = isStego 
+            ? 'The image shows statistical anomalies typical of steganographic content'
+            : 'The image appears to be clean with normal statistical characteristics';
+
           resultContent.innerHTML = `
             <div class="analysis-result">
-              <h3>Result analysis</h3>
-              <p>Probability of steganography: <strong>${prob}%</strong></p>
-              <p>${data.result}</p>
-              ${featuresHtml}
+              <div class="prob-gauge">
+                <div class="gauge-label">Steganography Probability</div>
+                <div class="gauge-value" style="color: ${isStego ? '#ef4444' : '#10b981'}">${probPercent}%</div>
+                <div class="gauge-bar">
+                  <div class="gauge-fill" style="width: ${probPercent}%; background: ${isStego ? '#ef4444' : '#10b981'}"></div>
+                </div>
+                <div class="gauge-result" style="color: ${isStego ? '#ef4444' : '#10b981'}">${resultLabel}</div>
+              </div>
+              <p class="result-desc">${resultDesc}</p>
+              ${featureHtml}
             </div>
           `;
         } else {
-          resultContent.textContent = data.error || 'Ошибка анализа';
+          resultContent.textContent = data.error || 'Analysis error';
         }
       } catch (error) {
-        resultContent.textContent = 'Ошибка соединения с сервером';
+        resultContent.textContent = 'Server connection error';
         console.error('Analyze error:', error);
       } finally {
         loaderContainer.style.opacity = '0';

@@ -1,254 +1,341 @@
-# Expert Steganalysis System
+# StegoGuard - Intelligent Expert System for Steganalysis
 
-## Project Overview
+<div align="center">
 
-Multi-service steganography detection system that analyzes digital images for hidden content. The system extracts 14 statistical features from images pixels data and uses a machine learning model to predict the probability of steganography.
+![Architecture](https://img.shields.io/badge/Architecture-Microservices-green)
+![Go](https://img.shields.io/badge/Go-1.25-blue)
+![Python](https://img.shields.io/badge/Python-FastAPI-blue)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-### Architecture
+**An intelligent steganalysis system that detects hidden content in digital images using machine learning**
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Frontend   │────▶│    Go API    │────▶│   Python ML  │
-│  (static)   │     │  (port 8080) │     │  (port 8000) │
-└─────────────┘     └─────────────┘     └─────────────┘
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │  PostgreSQL │
-                    │    (db)     │
-                    └─────────────┘
-```
-
-### Services
-
-| Service | Directory | Language | Port | Purpose |
-|---------|-----------|----------|------|---------|
-| Backend | `stego_analyzer/` | Go 1.25 | 8080 | REST API, auth, image processing |
-| ML Model | `stego_model/` | Python | 8000 | Feature-based steganalysis prediction |
-| Frontend | `frontend/` | HTML/JS | 3000 | User interface |
-| Database | `db/` | PostgreSQL | 5432 | User data storage |
+</div>
 
 ---
 
-## Essential Commands
+## Overview
+
+StegoGuard is an expert system for detecting steganographic content in digital images containers. The system analyzes images using 14 statistical features and predicts the probability of hidden data using a trained machine learning model.
+
+### What is Steganalysis?
+
+Steganalysis is the science of detecting hidden information within digital media. This project implements classic statistical methods to identify whether an image contains steganographic content (hidden data embedded in the image pixels).
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              CLIENT LAYER                                   │
+│      ┌─────────────────────────────────────────────────────────────────┐    │
+│      │                        Frontend (nginx)                         │    │
+│      │              http://localhost:3000 (static HTML/JS)             │    │
+│      └─────────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+                                       │ HTTP
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                             API GATEWAY LAYER                           │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │                  Backend API (Go, port 8080)                    │   │
+│   │                                                                 │   │
+│   │   ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐    │   │
+│   │   │ /health  │  │/register │  │ /login   │  │ /api/analyze │    │   │
+│   │   └──────────┘  └──────────┘  └──────────┘  └──────────────┘    │   │
+│   │                    │                                    │       │   │
+│   │                    ▼                                    ▼       │   │
+│   │ ┌─────────────────────────────────────────────────────────────┐ │   │
+│   │ │              Authentication (JWT + BCrypt)                  │ │   │
+│   │ └─────────────────────────────────────────────────────────────┘ │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+└────────────────────────────────────┬────────────────────────────────────┘
+                                     │
+                    ┌────────────────┴────────────────┐
+                    │                │                │                
+                    ▼                ▼                ▼                
+    ┌──────────────────┐    ┌──────────────┐      ┌──────────────────┐
+    │  POSTGRESQL DB   │    │  ML SERVICE  │      │  FEATURE         │
+    │     (port 5432)  │    │ (port 8000)  │      │  EXTRACTION      │
+    │                  │    │              │      │                  │
+    │  - users table   │    │  - FastAPI   │      │  - LSB Analysis  │
+    │  - user_id       │    │  - scikit-   │      │  - Chi-Square    │
+    │  - email         │    │    learn     │      │  - RS Analysis   │
+    │  - hashed_pw     │    │    model     │      │  - Entropy       │
+    │  - name          │    │              │      │                  │
+    └──────────────────┘    └──────────────┘      └──────────────────┘
+```
+
+---
+
+## How It Works (Business Logic)
+
+### 1. User Authentication Flow
+
+```
+User Registration                    User Login
+       │                                 │
+       ▼                                 ▼
+┌──────────────────┐           ┌──────────────────┐
+│  Validate input  │           │  Find user by    │
+│  (email, pass,   │           │  email           │
+│   name)          │           └────────┬─────────┘
+└────────┬─────────┘                    │
+         │                              ▼
+         ▼                     ┌─────────────────┐
+┌──────────────────┐           │  Compare bcrypt │
+│  Check email     │           │  hash with      │
+│  uniqueness      │           │  password       │
+└────────┬─────────┘           └────────┬────────┘
+         │                              │
+         ▼                              ▼
+┌──────────────────┐           ┌──────────────────┐
+│  Hash password   │           │  Generate JWT    │
+│  (bcrypt)        │           │  (72h expiry)    │
+└────────┬─────────┘           └────────┬─────────┘
+         │                              │
+         ▼                              ▼
+┌──────────────────┐           ┌──────────────────┐
+│  Insert to DB    │           │  Return token    │
+│  Return user     │           │  + user data     │
+└──────────────────┘           └──────────────────┘
+```
+
+### 2. Image Analysis Flow
+
+```
+User uploads image                    Extract pixel data
+       │                                 │
+       ▼                                 ▼
+┌──────────────────┐           ┌──────────────────┐
+│  Validate JWT    │           │  Decode image    │
+│  token           │           │  (PNG/JPEG)      │
+└────────┬─────────┘           └────────┬─────────┘
+         │                              │
+         ▼                              ▼
+┌──────────────────┐           ┌──────────────────┐
+│  Get user_id     │           │  Extract 14      │
+│  from context    │           │  statistical     │
+└────────┬─────────┘           │  features        │
+         │                     └────────┬─────────┘
+         │                               │
+         ▼                               ▼
+         │                    ┌─────────────────────┐
+         │                    │  1. LSB Transition  │
+         │                    │  2. Bit Run (00-11) │
+         │                    │  3. Neighbor Diff   │
+         │                    │  4. Chi-Square      │
+         │                    │  5. LSB Entropy     │
+         │                    │  6. RS Features     │
+         │                    │     (R, S, Rm, Sm)  │
+         │                    │  7. Rm-R, Sm-S      │
+         │                    └──────────┬──────────┘
+         │                               │
+         ▼                               ▼
+┌────────────────────────────────────────────────────────────────┐
+│                    Send features to ML Model                   │
+└─────────────────────────────────┬──────────────────────────────┘
+                                  │
+                                  ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                    ML Model Prediction                           │
+│                                                                  │
+│   Input: [14 features] → scikit-learn → [stego_probability]      │
+│   Output: {"stego_prob": 0.7234}                                 │
+└─────────────────────────────────┬────────────────────────────────┘
+                                  │
+                                  ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                    Return Result to Client                       │
+│                                                                  │
+│   {                                                              │
+│     "stego_prob": 0.72,     // ML probability                    │
+│     "result": "Hidden content detected",                         │
+│     "features": [           // Feature analysis                  │
+│       {"name": "LSB Transition", "value": 0.52,                  │
+│        "min_normal": 0.45, "max_normal": 0.55,                   │
+│        "is_anomaly": false},                                     │
+│       ...                                                        │
+│     ]                                                            │
+│   }                                                              │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Services
+
+| Service | Technology | Port | Description |
+|---------|-----------|------|-------------|
+| **Frontend** | HTML/CSS/JS | 3000 | User interface, static files served by nginx |
+| **Backend** | Go 1.25 | 8080 | REST API, authentication, image processing |
+| **ML Model** | Python + FastAPI | 8000 | Steganalysis prediction service |
+| **Database** | PostgreSQL | 5432 | User data storage |
+
+---
+
+## Feature Extraction Algorithms
+
+The system uses 14 statistical features commonly used in steganalysis:
+
+| # | Feature | Description |
+|---|---------|-------------|
+| 1 | LSB Transition | Frequency of LSB bit changes between adjacent pixels |
+| 2-5 | Bit Run (00, 01, 10, 11) | Statistics of LSB pair transitions |
+| 6 | Neighbor Diff | LSB difference between adjacent pixels |
+| 7 | Chi-Square | Chi-square test for LSB distribution uniformity |
+| 8 | Entropy LSB | Shannon entropy of LSB bits |
+| 9-10 | R, S | RS analysis: Regular and Singular group ratios |
+| 11-12 | Rm, Sm | RS groups after LSB flipping |
+| 13-14 | Rm-R, Sm-S | Difference features for detection |
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Docker
+- Docker Compose
 
 ### Running the System
 
 ```bash
+# Clone and navigate to project
+cd stego_analyze
+
+# Create .env file
+echo "JWT_SECRET=your-secret-key-here" > .env
+
 # Start all services
 docker-compose up -d
 
+# Check status
+docker-compose ps
+
 # View logs
 docker-compose logs -f
-
-# Stop all services
-docker-compose down
-
-# Rebuild specific service
-docker-compose build <service-name>
-docker-compose up -d <service-name>
 ```
 
-### Backend (Go)
+### Access
 
-```bash
-# Development (from stego_analyzer directory)
-go run .
-
-# Build binary
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -trimpath -o backend .
-
-# Run tests
-go test ./...
-```
-
-### ML Model (Python)
-
-```bash
-# From stego_model directory with venv activated
-python server.py
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
----
-
-## Configuration
-
-### Environment Variables
-
-Create `.env` file in project root:
-
-```bash
-# Required
-JWT_SECRET=your-secret-key-here
-
-# Database (auto-derived by docker-compose)
-DATABASE_URI=postgresql://postgres:postgres@db:5432/postgres
-
-# Optional (have defaults)
-LOG_LEVEL=1          # 0=debug, 1=info, 2=warn, 3=error
-LOG_DIR=./logs
-ADDR=:8080
-```
-
-### Config Loading
-
-- Go backend loads config from `.env` via `github.com/joho/godotenv` + `github.com/caarlos0/env/v11`
-- Config path in code: `config.Load()` tries to load `../.env` relative to working dir
-- **Critical**: JWT_SECRET must be non-empty or app fails to start
-
----
-
-## Code Patterns & Conventions
-
-### Go Backend
-
-**Package Structure:**
-```
-stego_analyzer/
-├── main.go           # Entry point
-├── config/           # Configuration loading
-├── application/     # HTTP handlers, routing, auth
-├── database/        # DB connection, repository pattern
-├── logger/          # Structured logging with rotation
-└── stego/           # Feature extraction algorithms
-```
-
-**Naming:**
-- Lowercase filenames: `database.go`, `handlers.go`
-- PascalCase types/functions: `type Application struct`, `func NewApplication()`
-- camelCase variables: `db`, `logger`, `userRepo`
-
-**Database:**
-- Uses `github.com/jmoiron/sqlx` for queries building
-- Repository pattern: `UserRepository` struct with methods
-- PostgreSQL with `github.com/lib/pq` driver (imported as `_` for side effect)
-
-**HTTP:**
-- Uses `github.com/gorilla/mux` for routing
-- Context-based auth: user ID stored in `context.WithValue(r.Context(), userIDKey, userID)`
-- CORS middleware with whitelist (hardcoded origins list in `corsMiddleware`)
-
-**Auth:**
-- JWT via `github.com/golang-jwt/jwt/v5`
-- Password hashing via `golang.org/x/crypto/bcrypt`
-- Token includes `user_id` (float64) and `email` claims
-
-### Python ML Model
-
-**Structure:**
-```
-stego_model/
-├── server.py         # FastAPI app, /predict endpoint
-├── model.py         # (if exists) ML logic
-├── stego_model.pkl  # Trained scikit-learn model (joblib)
-└── requirements.txt # Dependencies
-```
-
-**Prediction:**
-- Input: JSON `{"features": [14 floats]}`
-- Output: JSON `{"stego_prob": float}` (probability 0-1)
-- Model uses `predict_proba()` returning `[class_0_prob, class_1_prob]`
-
-### Frontend
-
-- Single `index.html` with embedded CSS and JS
-- API endpoint hardcoded: `const BACKEND_URL = "http://localhost:8080"`
-- Uses Fetch API with JSON for auth, FormData for file upload
-- Has artificial delay (line 312-313): `const demoDelay = Math.random() * 4000 + 1000` - this appears to be for demo purposes, actual backend call happens after
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **ML Model API**: http://localhost:8000
+- **Health Check**: http://localhost:8080/health
 
 ---
 
 ## API Endpoints
 
-### Public (no auth)
+### Public Endpoints
 
-| Method | Path | Purpose |
-|--------|------|---------|
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | GET | `/health` | Health check |
-| POST | `/register` | Create account |
-| POST | `/login` | Authenticate |
+| POST | `/register` | Register new user |
+| POST | `/login` | Login, returns JWT |
 
-### Protected (requires JWT)
+### Protected Endpoints (require JWT)
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/api/profile` | Get current user |
-| POST | `/api/change-password` | Update password |
-| POST | `/api/analyze` | Upload image for steganalysis |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/analyze` | Analyze image for steganography |
+| POST | `/api/change-password` | Change user password |
 
-### Request/Response Formats
+### Request Examples
 
-**Register/Login:**
-```json
-// Request
-{"email": "string", "password": "string", "name": "string"}
-
-// Response
-{"token": "jwt-token", "user": {"id": int, "email": "string", "name": "string"}}
+**Register:**
+```bash
+curl -X POST http://localhost:8080/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"pass1234","name":"John"}'
 ```
 
-**Analyze (multipart/form-data):**
-```json
-// Request: form-data with field "image" (file)
+**Login:**
+```bash
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"pass1234"}'
+```
 
-// Response
-{"stego_prob": 0.7234, "result": "likely contains hidden container"}
-// Threshold: prob > 0.5 = "likely contains hidden container"
+**Analyze Image:**
+```bash
+curl -X POST http://localhost:8080/api/analyze \
+  -H "Authorization: Bearer <token>" \
+  -F "image=@image.png"
 ```
 
 ---
 
-## Feature Extraction (14 features)
+## Project Structure
 
-Located in `stego_analyzer/stego/features.go`:
-
-| Feature | Description |
-|---------|-------------|
-| LSBTransitions | LSB bit flip frequency |
-| BitRun00-11 | LSB pair transition statistics |
-| NeighborDiff | Adjacent pixel LSB difference |
-| ChiSquare | Chi-square test on LSB distribution |
-| EntropyLSB | Shannon entropy of LSB |
-| R, S | RS analysis regular/singular groups |
-| Rm, Sm | RS after LSB flip |
-| RmR, SmS | Differences |
-
----
-
-## Important Gotchas
-
-1. **CORS is restrictive**: Only `http://frontend_app:3000` and `http://localhost:3000` allowed. Backend fails silently for other origins.
-
-2. **Docker networking**: Backend calls FastAPI at `http://stego-model:8000` (docker DNS), not `localhost:8000`.
-
-3. **JWT claims**: `user_id` is stored as float64 in JWT, parsed as `float64` then cast to `int64` (line 481-487 in handlers.go).
-
-4. **Password validation**:
-   - Min 8 characters
-   - Name min 2 characters
-   - Email must match regex
-
-5. **File upload limits**: Max 10MB (`10 << 20` in `ParseMultipartForm` call at line 261).
-
-6. **Model file missing**: `stego_model/stego_model.pkl` is not in repo (gitignored) - will fail to load if not volume-mounted or created.
-
-7. **Frontend demo delay**: Artificial 1-5 second delay in `handleAnalyze()` before actual API call - this is likely for UX demo.
-
-8. **Go module name**: Module is `main` (not typical path), imports paths like `main/application`.
-
-9. **PostgreSQL init**: `db/initdb.sql` creates `users` table with auto-increment `user_id`.
-
-10. **Logging**: Uses `gopkg.in/natefinch/lumberjack.v2` for rotation; log directory must be writable.
+```
+expert_steanalysis_system/
+├── docker-compose.yml       # Orchestration
+├── .env                    # Environment variables
+│
+├── frontend/               # Web interface
+│   ├── index.html         # Main page
+│   ├── styles.css         # Styles
+│   ├── Dockerfile         # nginx container
+│   └── frontend.yml       # Compose config
+│
+├── stego_analyzer/         # Backend (Go)
+│   ├── main.go            # Entry point
+│   ├── config/            # Configuration
+│   ├── application/       # Handlers & routing
+│   ├── database/          # PostgreSQL repository
+│   ├── logger/           # Logging
+│   ├── stego/            # Feature extraction
+│   │   ├── features.go   # 14 feature algorithms
+│   │   ├── loader.go    # Image decoding
+│   │   └── stego.go      # Response types
+│   ├── Dockerfile        # Go container
+│   └── backend.yml       # Compose config
+│
+├── stego_model/           # ML Service (Python)
+│   ├── server.py         # FastAPI app
+│   ├── model.py          # ML logic
+│   ├── stego_model.pkl   # Trained model (not in repo)
+│   ├── requirements.txt  # Python deps
+│   ├── Dockerfile        # Python container
+│   └── fastapi.yml       # Compose config
+│
+└── db/                    # Database
+    ├── Dockerfile        # PostgreSQL
+    ├── initdb.sql        # Schema
+    └── db.yml           # Compose config
+```
 
 ---
 
-## Development Notes
+## Tech Stack
 
-- No test files visible in the codebase
-- No Makefile or build scripts (uses docker-compose)
-- Frontend is static HTML - no build step required
-- Model training code not included (just pre-trained `.pkl` file)
-- Logs written to `./logs` relative to working dir (needs write permission)
+| Component | Technology |
+|-----------|-----------|
+| Backend | Go 1.25, gorilla/mux, golang-jwt, sqlx |
+| ML Service | Python 3.x, FastAPI, scikit-learn, joblib |
+| Frontend | HTML5, CSS3, Vanilla JS |
+| Database | PostgreSQL |
+| Container | Docker, nginx |
+
+---
+
+## Security Features
+
+- **Password Storage**: BCrypt hashing (cost factor 10)
+- **Authentication**: JWT tokens with 72-hour expiry
+- **CORS**: Whitelist-based origin control
+- **Input Validation**: Email regex, password/name length limits
+- **File Upload**: 10MB size limit
+
+---
+
+## License
+
+MIT License
+
+---
+
