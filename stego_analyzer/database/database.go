@@ -104,35 +104,11 @@ func (r *UserRepository) UpdatePassword(ctx context.Context, user User) error {
 }
 
 func (r *UserRepository) Create(ctx context.Context, user User) error {
-	tx, err := r.db.BeginTxx(ctx, nil)
-	if err != nil {
-		r.logger.Errorf("Failed to begin transaction for user creation: %v", err)
-		return fmt.Errorf("failed to begin transaction: %w", err)
-	}
-
-	var originalErr error
-	defer func() {
-		if originalErr != nil {
-			if rbErr := tx.Rollback(); rbErr != nil {
-				r.logger.Errorf("Rollback error: %v, original error: %v", rbErr, originalErr)
-			} else {
-				r.logger.Debugf("Transaction rolled back successfully")
-			}
-		}
-	}()
-
 	query := `INSERT INTO users (email, hashed_password, name) VALUES ($1, $2, $3) RETURNING user_id`
-	err = tx.QueryRowxContext(ctx, query, user.Email, user.HashedPassword, user.Name).Scan(&user.ID)
+	err := r.db.QueryRowContext(ctx, query, user.Email, user.HashedPassword, user.Name).Scan(&user.ID)
 	if err != nil {
-		originalErr = err
 		r.logger.Errorf("Failed to create user with email %s: %v", user.Email, err)
 		return fmt.Errorf("failed to create user: %w", err)
-	}
-
-	if err = tx.Commit(); err != nil {
-		originalErr = err
-		r.logger.Errorf("Failed to commit transaction for user creation: %v", err)
-		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	r.logger.Infof("User created successfully with id %d and email %s", user.ID, user.Email)
