@@ -309,9 +309,6 @@
       loaderContainer.style.visibility = 'visible';
       resultContent.style.display = 'none';
 
-      const demoDelay = Math.random() * 4000 + 1000;
-      await new Promise(resolve => setTimeout(resolve, demoDelay));
-
       try {
         const formData = new FormData();
         formData.append('image', file);
