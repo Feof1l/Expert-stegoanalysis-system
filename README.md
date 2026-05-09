@@ -1,4 +1,4 @@
-# AGENTS.md - Expert Steganalysis System
+# Expert Steganalysis System
 
 ## Project Overview
 
