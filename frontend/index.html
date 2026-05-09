@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Stego Analyzer</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -290,13 +292,13 @@
     async function handleAnalyze() {
       const file = document.getElementById('image-input').files[0];
       if (!file) {
-        document.getElementById('result-content').textContent = 'Пожалуйста, выберите изображение';
+        document.getElementById('result-content').textContent = 'Please select the image';
         return;
       }
 
       const token = localStorage.getItem('token');
       if (!token) {
-        document.getElementById('result-content').textContent = 'Необходимо авторизоваться';
+        document.getElementById('result-content').textContent = 'You need to log in';
         return;
       }
 
@@ -326,11 +328,27 @@
         
         if (response.ok) {
           const prob = (data.stego_prob * 100).toFixed(1);
+          let featuresHtml = '';
+          if (data.features && data.features.length > 0) {
+            featuresHtml = '<div class="features-table"><h4>Feature analysis</h4><table><thead><tr><th>Feature</th><th>Value</th><th>Normal range</th><th>Status</th></tr></thead><tbody>';
+            for (const f of data.features) {
+              const statusClass = f.is_anomaly ? 'anomaly' : 'normal';
+              const statusText = f.is_anomaly ? 'Deviation' : 'Standard';
+              featuresHtml += `<tr class="${statusClass}">
+                <td>${f.name}</td>
+                <td>${f.value.toFixed(6)}</td>
+                <td>${f.min_normal.toFixed(2)} - ${f.max_normal.toFixed(2)}</td>
+                <td>${statusText}</td>
+              </tr>`;
+            }
+            featuresHtml += '</tbody></table></div>';
+          }
           resultContent.innerHTML = `
             <div class="analysis-result">
-              <h3>Результат анализа</h3>
-              <p>Вероятность стеганографии: <strong>${prob}%</strong></p>
+              <h3>Result analysis</h3>
+              <p>Probability of steganography: <strong>${prob}%</strong></p>
               <p>${data.result}</p>
+              ${featuresHtml}
             </div>
           `;
         } else {

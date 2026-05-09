@@ -695,3 +695,53 @@ input:focus {
 .open-file:active {
   transform: scale(0.98);
 }
+
+/* Features analysis table */
+.features-table {
+  margin-top: 24px;
+}
+
+.features-table h4 {
+  color: var(--accent);
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.features-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.features-table th,
+.features-table td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.features-table th {
+  color: var(--text);
+  font-weight: 600;
+  background: var(--input-bg);
+}
+
+.features-table tr.anomaly {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.features-table tr.anomaly td {
+  color: #f87171;
+}
+
+.features-table tr.normal {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.features-table tr.normal td {
+  color: #34d399;
+}
+
+.features-table td:first-child {
+  font-weight: 500;
+}

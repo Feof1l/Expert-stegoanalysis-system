@@ -367,9 +367,12 @@ func (app *Application) analyzeHandler(w http.ResponseWriter, r *http.Request) {
 	app.logger.Infof("Analysis complete: user_id=%d, filename=%s, stego_prob=%.4f, result=%s",
 		userID, filename, prob, result)
 
+	featuresWithAnalysis := stego.GetFeaturesWithAnalysisSlice(featureSlice)
+
 	response := stego.AnalyzeResponse{
 		StegoProb: prob,
 		Result:    result,
+		Features:  featuresWithAnalysis,
 	}
 	app.respondWithJSON(w, http.StatusOK, response)
 }

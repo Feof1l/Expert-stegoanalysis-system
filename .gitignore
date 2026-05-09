@@ -6,3 +6,5 @@ stego_analyzer/analyzer
 stego_analyzer/features.csv
 .env
 stego_analyzer/logs
+.crush
+AGENTS.md
